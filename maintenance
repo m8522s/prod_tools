@@ -1,0 +1,18 @@
+#!/bin/bash
+# $RCSfile: maintenance,v $ $Date: 2021/08/15 19:08:45 $ $Revision: 2.4 $
+# $Destination: /usr/bin/maintenance $
+
+# purpose: mark this system as under maintenance to not report errors
+
+# set maintenance flag
+touch /etc/maintenance
+
+# remove this flag automatically after 24 hours
+which atd >/dev/null
+if [ $? == 0 ] ; then
+  echo "rm -f /etc/maintenance" | at now + 24 hours
+else
+  echo "remove file /etc/maintenance when maintenance is complete"
+fi
+
+exit 0

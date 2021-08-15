@@ -1,0 +1,37 @@
+#!/bin/bash
+# $Id: dist,v 2.5 2018/06/14 10:21:42 usbe0102 Exp $
+# $Source: /home/CVSROOT/prod_tools/dist,v $
+# $Destination: /usr/bin/dist $
+
+# purpose: use distribute-ng method to copy/install file
+
+# the filename is expected as first command-line argument
+dist_file=$1
+
+if [ -z "$dist_file" ] ; then
+  echo "distribute which file?"
+
+else
+  if [ -f "$dist_file" ] ; then
+
+    # search for the CVS tag
+    destination=$(grep \$Destination ${dist_file} | head -1 | grep -v distribute | awk '{ print $3 }')
+
+    if [ -z $destination ] ; then
+      echo "\$Destination$ tag not found in file"
+      exit 2
+    else
+      #echo "\$Destination\$ is: $destination"
+
+      # copy the file to the correct destination
+      cp --force ${dist_file} ${destination}
+
+      # use the exit code from 'cp' command as exit code for this script
+      exit $?
+    fi
+
+  else
+    echo "file '$dist_file' not found"
+    exit 1
+  fi
+fi

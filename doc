@@ -1,0 +1,85 @@
+#!/bin/bash
+# $RCSfile: doc,v $ $Date: 2021/08/15 19:12:21 $ $Revision: 1.12 $
+# $Destination: /usr/bin/doc $
+
+# purpose: quick-and-dirty documentation builder
+
+# notes:
+# * call 'doc' without arguments to remember the previous command
+# * all commands are written to filename specified in $DOC_FILE
+# * default filename is myproject.doc
+# * comment starting with # needs quoting or dereferencing
+# * quote the command when working with pipes or redirection
+# * print debug output when bash variable DOC_DEBUG is set
+
+
+# store the commands in a file as specified by DOC_FILE
+if [ -z ${DOC_FILE} ] ; then	# variable is unset
+	DOC=~/myproject.doc
+else
+	DOC=${DOC_FILE}
+fi
+
+# format output for script debugging
+function debug {
+	if [ ! -z $DOC_DEBUG ] ; then
+		echo " [doc] $1"
+	fi
+}
+debug "starting at `date +%Y/%m/%dT%H:%M:%S.%N`"
+debug "append to $DOC"
+
+CMD_LINE=$@
+debug "arguments: $CMD_LINE"
+EXIT_CODE=0
+
+FIRST_LETTER=`echo $CMD_LINE | cut -c1-1`
+debug "first letter: $FIRST_LETTER"
+
+if [ "$1" == "" ] ; then		# called without argument
+	debug "mode: previous-command"
+
+	# this sub-command tries to put the previous command
+	# in the documentation.
+	# Normally it is not possible to access the current history
+	# from within a script, so it is required to have the varialbe
+	# PROMPT_COMMAND='history -a'
+	# exported or in the users .bashrc
+
+	PREVIOUS_COMMAND=`tail -n1 ~/.bash_history`
+	echo $PREVIOUS_COMMAND >> $DOC
+
+elif [ "$1" == "cvs" ] ; then
+	# append CVS tags
+	echo -n '# $Id' >> $DOC
+	echo '$' >> $DOC
+	echo -n '# $Source' >> $DOC
+	echo '$' >> $DOC
+	echo -n '# $Destination' >> $DOC
+	echo '$' >> $DOC
+	echo "#" >> $DOC
+
+elif [ "$1" == "list" ] ; then
+	tail -n50 ${DOC}
+
+elif [ "$FIRST_LETTER" == "=" ] ; then
+	debug "mode: asciidoc"
+	# pure documentation line
+	echo "" >> $DOC
+	echo "$CMD_LINE" >> $DOC
+
+elif [ "$FIRST_LETTER" == "#" -o "$FIRST_LETTER" == "/" ] ; then
+	debug "mode: comment"
+	# comment line (comments starting with # must be quoted
+	# or dereferenced. No special handling for // comments)
+	echo "$CMD_LINE" >> $DOC
+
+else
+	debug "mode: command"
+	echo "$CMD_LINE" >> $DOC
+	eval ${CMD_LINE}
+	EXIT_CODE=$?
+fi
+
+debug "ended with exit code ${EXIT_CODE} at `date +%Y/%m/%dT%H:%M:%S.%N`"
+exit $EXIT_CODE

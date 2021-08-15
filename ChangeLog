@@ -1,0 +1,10 @@
+## [0.2] - 2021-08-15
+- maintenance mode
+- access CVS from inside vim
+- quick document bash commands
+
+## [0.1] - 2019-03-06
+- development version, testing features
+- CVS helpers
+- file collector script
+- dist file to target path

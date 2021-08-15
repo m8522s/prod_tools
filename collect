@@ -1,0 +1,52 @@
+#!/bin/bash
+# $RCSfile: collect,v $ $Date: 2021/08/15 19:08:45 $ $Revision: 2.4 $
+# $Destination: /usr/bin/collect $
+
+# purpose: get the file from the filesystem and put in CVS project folder
+
+# the filename is expected as first command-line argument
+file=$1
+
+if [ -z "$file" ] ; then
+  echo "collect which file?"
+
+else
+  if [ -f "$file" ] ; then
+
+    # search for the CVS $Source: /home/CVSROOT/prod_tools/collect,v $ tag
+    source=$(grep \$Source ${file} | head -1 | grep -v distribute | awk '{ print $3 }')
+
+    if [ -z $source ] ; then
+      echo "\$Source\$ tag not found in file"
+      exit 2
+    else
+      #echo "\$Source\$ is: $source"
+
+      # extract the CVS project directory from $Source: /home/CVSROOT/prod_tools/collect,v $ tag
+      cvs_path=$(echo $source | awk 'BEGIN { FS = "CVSROOT/" } ; { print $2 }')
+      cvs_path=$(echo $HOME/$(dirname ${cvs_path}))
+      #echo "path within project: $cvs_path"
+
+      if [ -d ${cvs_path} ] ; then
+        #echo "cp --force $file ${cvs_path}/"
+
+        # give feedback to bash so the user can pipe the output
+        # to the next command like 'cvs commit'
+        echo ${cvs_path}/$(basename ${file})
+
+        # copy the file from the filesystem to the CVS project
+        cp --force ${file} ${cvs_path}
+
+        # use the exit code from 'cp' command as exit code for this script
+        exit $?
+      else
+        echo "directory '${cvs_path}' doesn't exist"
+        exit 3
+      fi
+    fi
+
+  else
+    echo "file '$file' not found"
+    exit 1
+  fi
+fi
