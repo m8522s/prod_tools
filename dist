@@ -1,11 +1,10 @@
 #!/bin/bash
-# $Id: dist,v 2.5 2018/06/14 10:21:42 usbe0102 Exp $
-# $Source: /home/CVSROOT/prod_tools/dist,v $
+# $RCSfile: dist,v $ $Date: 2022/01/19 07:49:40 $ $Revision: 2.7 $
 # $Destination: /usr/bin/dist $
 
-# purpose: use distribute-ng method to copy/install file
+# purpose: use distribute method to copy/install files
 
-# the filename is expected as first command-line argument
+# the filename is required as first command-line argument
 dist_file=$1
 
 if [ -z "$dist_file" ] ; then
